@@ -47,7 +47,7 @@ func (s *vyos) downloadImage(definition shared.Definition) error {
 	var fpath string
 
 	baseURL := s.definition.Source.URL
-	s.fname = fmt.Sprintf("vyos-.tar.gz")
+	s.fname = fmt.Sprintf("vyos-1.2.9-S1-amd64.iso")
 
 	url, err := url.Parse(baseURL)
 	if err != nil {
