@@ -26,6 +26,7 @@ func (s *vyos) Run() error {
 		return fmt.Errorf("Failed to download image: %w", err)
 	}
 
+	fmt.Println(s.fpath, s.fname)
 	return s.unpackISO(filepath.Join(s.fpath, s.fname), s.rootfsDir)
 }
 
@@ -86,7 +87,7 @@ func (s *vyos) downloadImage(definition shared.Definition) error {
 
 	s.fpath, err = s.DownloadHash(s.definition.Image, baseURL+s.fname, checksumFile, sha256.New())
 
-	return nil
+	return err
 }
 
 // func (s *vyos) getLatestReleaseURL() (string, error) {
