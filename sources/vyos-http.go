@@ -47,10 +47,11 @@ func (s *vyos) downloadImage(definition shared.Definition) error {
 	var err error
 	var fpath string
 
+	// https://legacy-lts-images.vyos.io/1.2.9-S1/vyos-1.2.9-S1-amd64.iso
 	// https://github.com/vyos/vyos-rolling-nightly-builds/releases/download/1.5-rolling-202310240118/vyos-1.5-rolling-202310240118-amd64.iso
 	// baseURL := s.definition.Source.URL
-	baseURL := "https://github.com/vyos/vyos-rolling-nightly-builds/releases/download/1.5-rolling-202310240118/vyos-1.5-rolling-202310240118-amd64.iso"
-	s.fname = "vyos-1.5-rolling-202310240118-amd64.iso"
+	baseURL := "https://legacy-lts-images.vyos.io/1.2.9-S1/"
+	s.fname = "vyos-1.2.9-S1-amd64.iso"
 
 	url, err := url.Parse(baseURL)
 	if err != nil {
