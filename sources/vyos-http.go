@@ -31,19 +31,6 @@ func (s *vyos) Run() error {
 }
 
 func (s *vyos) downloadImage(definition shared.Definition) error {
-	// switch strings.ToLower(s.definition.Image.Variant) {
-	// case "default", "rolling":
-	// 	url, err := getLatestReleaseURL()
-	// 	// rolling release
-
-	// 	// baseURL := fmt.Sprintf("https://github.com/vyos/vyos-rolling-nightly-builds/releases/download/", )
-
-	// case "legacy":
-	//	// legacy release
-
-	// case "manual":
-	// set url
-
 	var err error
 
 	ctx := context.Background()
@@ -60,7 +47,6 @@ func (s *vyos) downloadImage(definition shared.Definition) error {
 	assets := latestRelease.Assets
 	for _, a := range assets {
 		ext := filepath.Ext(a.GetName())
-		fmt.Println(ext)
 		if ext == ".iso" {
 			isoURL = a.GetBrowserDownloadURL()
 		}
@@ -72,10 +58,13 @@ func (s *vyos) downloadImage(definition shared.Definition) error {
 
 	s.fpath, err = s.DownloadHash(s.definition.Image, isoURL, "", sha256.New())
 
+	fmt.Println(err)
+
 	return err
 }
 
 func (s *vyos) unpackISO(filePath string, rootfsDir string) error {
+	fmt.Println(filePath)
 	isoDir, err := os.MkdirTemp(s.cacheDir, "temp_")
 	if err != nil {
 		return fmt.Errorf("Failed creating temporary directory: %w", err)
