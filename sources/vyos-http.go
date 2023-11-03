@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/sys/unix"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v56/github"
 	"github.com/lxc/distrobuilder/shared"
 )
 
