@@ -2,7 +2,6 @@ package sources
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -49,6 +48,7 @@ func (s *vyos) downloadImage(definition shared.Definition) error {
 		ext := filepath.Ext(a.GetName())
 		if ext == ".iso" {
 			isoURL = a.GetBrowserDownloadURL()
+			s.fname = a.GetName()
 		}
 	}
 
@@ -56,9 +56,7 @@ func (s *vyos) downloadImage(definition shared.Definition) error {
 		return fmt.Errorf("Failed to get latest release URL.")
 	}
 
-	s.fpath, err = s.DownloadHash(s.definition.Image, isoURL, "", sha256.New())
-
-	fmt.Println(err)
+	s.fpath, err = s.DownloadHash(s.definition.Image, isoURL, "", nil)
 
 	return err
 }
