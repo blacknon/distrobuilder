@@ -1,15 +1,15 @@
 package sources
 
 import (
+	"context"
 	"crypto/sha256"
-	"errors"
 	"fmt"
-	"net/url"
 	"os"
 	"path/filepath"
 
 	"golang.org/x/sys/unix"
 
+	"github.com/google/go-github/github"
 	"github.com/lxc/distrobuilder/shared"
 )
 
@@ -47,87 +47,34 @@ func (s *vyos) downloadImage(definition shared.Definition) error {
 	var err error
 	var fpath string
 
-	// https://legacy-lts-images.vyos.io/1.2.9-S1/vyos-1.2.9-S1-amd64.iso
-	// https://github.com/vyos/vyos-rolling-nightly-builds/releases/download/1.5-rolling-202310240118/vyos-1.5-rolling-202310240118-amd64.iso
-	// baseURL := s.definition.Source.URL
-	// baseURL := "https://legacy-lts-images.vyos.io/1.2.9-S1/"
-	baseURL := "https://github.com/vyos/vyos-rolling-nightly-builds/releases/download/1.5-rolling-202310240118/"
-	// s.fname = "vyos-1.2.9-S1-amd64.iso"
-	s.fname = "vyos-1.5-rolling-202310240118-amd64.iso"
+	ctx := context.Background()
+	client := github.NewClient(nil)
+	owner := "vyos"
+	repo := "vyos-rolling-nightly-builds"
 
-	url, err := url.Parse(baseURL)
+	latestRelease, _, err := client.Repositories.GetLatestRelease(ctx, owner, repo)
 	if err != nil {
-		return fmt.Errorf("Failed to parse URL %q: %w", baseURL, err)
+		return fmt.Errorf("Failed to get latest release, %w", err)
 	}
 
-	checksumFile := ""
-	// Force gpg checks when using http
-	if !s.definition.Source.SkipVerification && url.Scheme != "https" {
-		if len(s.definition.Source.Keys) == 0 {
-			return errors.New("GPG keys are required if downloading from HTTP")
-		}
-
-		checksumFile = baseURL + "SHA256SUMS"
-		fpath, err = s.DownloadHash(s.definition.Image, baseURL+"SHA256SUMS.gpg", "", nil)
-		if err != nil {
-			return fmt.Errorf("Failed to download %q: %w", baseURL+"SHA256SUMS.gpg", err)
-		}
-
-		_, err = s.DownloadHash(s.definition.Image, checksumFile, "", nil)
-		if err != nil {
-			return fmt.Errorf("Failed to download %q: %w", checksumFile, err)
-		}
-
-		valid, err := s.VerifyFile(
-			filepath.Join(fpath, "SHA256SUMS"),
-			filepath.Join(fpath, "SHA256SUMS.gpg"))
-		if err != nil {
-			return fmt.Errorf(`Failed to verify "SHA256SUMS": %w`, err)
-		}
-
-		if !valid {
-			return errors.New(`Invalid signature for "SHA256SUMS"`)
+	isoURL := ""
+	assets := latestRelease.Assets
+	for _, a := range assets {
+		ext := filepath.Ext(a.GetName())
+		fmt.Println(ext)
+		if ext == ".iso" {
+			isoURL = a.GetBrowserDownloadURL()
 		}
 	}
 
-	s.fpath, err = s.DownloadHash(s.definition.Image, baseURL+s.fname, checksumFile, sha256.New())
+	if isoURL == "" {
+		return fmt.Errorf("Failed to get latest release URL.")
+	}
+
+	s.fpath, err = s.DownloadHash(s.definition.Image, isoURL, "", sha256.New())
 
 	return err
 }
-
-// func (s *vyos) getLatestReleaseURL() (string, error) {
-// 	apiURL := "https://api.github.com/repos/vyos/vyos-rolling-nightly-builds/releases/latest"
-
-// 	resp, err := http.Get(apiURL)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("Failed to get latest version information: %q", err)
-// 	}
-// 	defer resp.Body.Close()
-
-// 	if resp.StatusCode != 200 {
-// 		return nil, fmt.Errorf("Failed to get latest version information: %q", resp.StatusCode)
-// 	}
-
-// 	body, _ := io.ReadAll(resp.Body)
-
-// 	return latestURL, nil
-// }
-
-// func (s *vyos) Run() error {
-// 	isoURL := "https://s3-us.vyos.io/rolling/current/vyos-rolling-latest.iso"
-
-// 	fpath, err := s.DownloadHash(s.definition.Image, isoURL, "", nil)
-// 	if err != nil {
-// 		return fmt.Errorf("Failed downloading ISO: %w", err)
-// 	}
-
-// 	err = s.unpackISO(filepath.Join(fpath, "vyos-rolling-latest.iso"), s.rootfsDir)
-// 	if err != nil {
-// 		return fmt.Errorf("Failed unpacking ISO: %w", err)
-// 	}
-
-// 	return nil
-// }
 
 func (s *vyos) unpackISO(filePath string, rootfsDir string) error {
 	isoDir, err := os.MkdirTemp(s.cacheDir, "temp_")
