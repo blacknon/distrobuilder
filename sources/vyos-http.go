@@ -45,7 +45,6 @@ func (s *vyos) downloadImage(definition shared.Definition) error {
 	// set url
 
 	var err error
-	var fpath string
 
 	ctx := context.Background()
 	client := github.NewClient(nil)
