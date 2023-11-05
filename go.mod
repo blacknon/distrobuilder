@@ -9,12 +9,12 @@ exclude (
 
 require (
 	github.com/flosch/pongo2 v0.0.0-20200913210552-0d938eb266f3
+	github.com/google/go-github/v56 v56.0.0
 	github.com/lxc/incus v0.0.0-20231030213510-385b6509cfce
 	github.com/mudler/docker-companion v0.4.6-0.20211015133729-bd4704fad372
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.4
-	github.com/google/go-github/v56 v56.0.0
 	golang.org/x/sys v0.13.0
 	golang.org/x/text v0.13.0
 	gopkg.in/antchfx/htmlquery.v1 v1.2.2
@@ -46,6 +46,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
